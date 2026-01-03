@@ -1,0 +1,201 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: oklch(0.08 0.01 250);
+  --foreground: oklch(0.98 0 0);
+  --card: oklch(0.12 0.01 250);
+  --card-foreground: oklch(0.98 0 0);
+  --popover: oklch(0.12 0.01 250);
+  --popover-foreground: oklch(0.98 0 0);
+  --primary: oklch(0.55 0.25 25);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.2 0.01 250);
+  --secondary-foreground: oklch(0.98 0 0);
+  --muted: oklch(0.2 0.01 250);
+  --muted-foreground: oklch(0.65 0 0);
+  --accent: oklch(0.55 0.25 25);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.55 0.25 25);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.25 0.01 250);
+  --input: oklch(0.25 0.01 250);
+  --ring: oklch(0.55 0.25 25);
+  --radius: 0.75rem;
+}
+
+.light {
+  --background: oklch(0.98 0 0);
+  --foreground: oklch(0.1 0.01 250);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.1 0.01 250);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.1 0.01 250);
+  --primary: oklch(0.55 0.25 25);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.95 0 0);
+  --secondary-foreground: oklch(0.1 0.01 250);
+  --muted: oklch(0.95 0 0);
+  --muted-foreground: oklch(0.45 0 0);
+  --accent: oklch(0.55 0.25 25);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.55 0.25 25);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.9 0 0);
+  --input: oklch(0.9 0 0);
+  --ring: oklch(0.55 0.25 25);
+}
+
+@theme inline {
+  /* optional: --font-sans, --font-serif, --font-mono if they are applied in the layout.tsx */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--card);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border-radius: 3px;
+}
+
+/* Safe area for mobile devices */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Text shadow utility */
+.text-shadow-lg {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+}
+
+/* Snap scroll for carousels */
+.snap-x {
+  scroll-snap-type: x mandatory;
+}
+
+.snap-mandatory > * {
+  scroll-snap-align: start;
+}
+
+/* Hide scrollbar on touch devices but keep scroll functional */
+@media (max-width: 768px) {
+  .carousel-track::-webkit-scrollbar {
+    display: none;
+  }
+  .carousel-track {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Prevent text selection on touch */
+.touch-manipulation {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* Animation classes */
+@keyframes slide-in-from-bottom-4 {
+  from {
+    transform: translateY(1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-from-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-in {
+  animation-duration: 0.3s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+
+.slide-in-from-bottom-4 {
+  animation-name: slide-in-from-bottom-4;
+}
+
+.slide-in-from-right {
+  animation-name: slide-in-from-right;
+}
+
+.fade-in {
+  animation-name: fade-in;
+}
+
+/* Duration utilities */
+.duration-200 {
+  animation-duration: 0.2s;
+}
+
+.duration-300 {
+  animation-duration: 0.3s;
+}
+
+.duration-400 {
+  animation-duration: 0.4s;
+}
