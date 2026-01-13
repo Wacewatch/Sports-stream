@@ -68,6 +68,7 @@ export function StreamModal({ match, open = true, onClose }: StreamModalProps) {
 
   const [isStreamUnlocked, setIsStreamUnlocked] = useState(false)
   const [unlockLoading, setUnlockLoading] = useState(false)
+  const [iframeLoading, setIframeLoading] = useState(false)
 
   const [loadingDetails, setLoadingDetails] = useState(true)
   const [stats, setStats] = useState<any[]>([])
@@ -260,18 +261,18 @@ export function StreamModal({ match, open = true, onClose }: StreamModalProps) {
       document.body.removeChild(link)
     }
 
-    // Unlock after short delay
     setTimeout(() => {
       setIsStreamUnlocked(true)
+      setIframeLoading(true) // Start iframe loading
       localStorage.setItem(UNLOCK_KEY, JSON.stringify({ timestamp: Date.now() }))
       setUnlockLoading(false)
 
       showNotification({
         type: "success",
         title: "Merci pour votre soutien !",
-        message: "Bon visionnage de votre match.",
+        message: "Chargement du stream...",
       })
-    }, 800)
+    }, 500) // Reduced delay
   }, [])
 
   const handleFavoriteToggle = () => {
@@ -513,17 +514,39 @@ export function StreamModal({ match, open = true, onClose }: StreamModalProps) {
                         </div>
                       )}
 
+                      {isStreamUnlocked && iframeLoading && (
+                        <div className="absolute inset-0 bg-black/90 z-40 flex items-center justify-center">
+                          <div className="text-center">
+                            <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 text-red-500 animate-spin" />
+                            <p className="text-sm sm:text-base md:text-lg font-bold text-white">
+                              Connexion au stream...
+                            </p>
+                            <p className="text-xs sm:text-sm text-gray-400 mt-2">
+                              Veuillez patienter quelques instants
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
                       <iframe
                         ref={iframeRef}
                         src={
                           isStreamUnlocked
-                            ? `${selectedStream}${selectedStream.includes("?") ? "&" : "?"}autoplay=1&muted=0`
+                            ? `${selectedStream}${selectedStream.includes("?") ? "&" : "?"}autoplay=1&muted=0&controls=1&autopause=0&background=0`
                             : "about:blank"
                         }
-                        className="w-full h-full border-0"
+                        className="absolute inset-0 w-full h-full border-0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                         allowFullScreen
-                        allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                        title="Match Stream"
+                        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
+                        onLoad={() => {
+                          if (isStreamUnlocked) {
+                            setIframeLoading(false)
+                          }
+                        }}
+                        onError={() => {
+                          setIframeLoading(false)
+                        }}
                       />
                     </>
                   ) : (
