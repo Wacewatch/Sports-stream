@@ -105,20 +105,9 @@ export function StreamModal({ match, open = true, onClose }: StreamModalProps) {
   const awayScore = match.score?.away ?? match.away_score ?? "-"
 
   useEffect(() => {
-    const unlockData = localStorage.getItem(UNLOCK_KEY)
-    if (unlockData) {
-      try {
-        const { timestamp } = JSON.parse(unlockData)
-        if (Date.now() - timestamp < UNLOCK_DURATION) {
-          setIsStreamUnlocked(true)
-        } else {
-          localStorage.removeItem(UNLOCK_KEY)
-          setIsStreamUnlocked(false)
-        }
-      } catch {
-        localStorage.removeItem(UNLOCK_KEY)
-      }
-    }
+    localStorage.removeItem(UNLOCK_KEY)
+    setIsStreamUnlocked(false)
+    setIframeLoading(false)
 
     setIsFav(isFavorite(match.id))
     addToHistory({
@@ -545,7 +534,7 @@ export function StreamModal({ match, open = true, onClose }: StreamModalProps) {
                         ref={iframeRef}
                         src={
                           isStreamUnlocked
-                            ? `${selectedStream}${selectedStream.includes("?") ? "&" : "?"}autoplay=1&muted=1&controls=1&loop=0`
+                            ? `${selectedStream}${selectedStream.includes("?") ? "&" : "?"}autoplay=1&muted=1&controls=1`
                             : "about:blank"
                         }
                         className="absolute inset-0 w-full h-full border-0"
@@ -553,18 +542,23 @@ export function StreamModal({ match, open = true, onClose }: StreamModalProps) {
                         allowFullScreen
                         onLoad={() => {
                           if (isStreamUnlocked) {
-                            console.log("[v0] Iframe loaded, attempting autoplay...")
+                            console.log("[v0] Iframe loaded successfully")
                             setIframeLoading(false)
                             setTimeout(() => {
-                              if (iframeRef.current) {
+                              if (iframeRef.current?.contentWindow) {
                                 try {
-                                  iframeRef.current.contentWindow?.postMessage({ action: "play" }, "*")
-                                  iframeRef.current.contentWindow?.postMessage({ action: "unmute" }, "*")
+                                  // Send multiple play commands to ensure it works
+                                  iframeRef.current.contentWindow.postMessage(
+                                    '{"event":"command","func":"playVideo","args":""}',
+                                    "*",
+                                  )
+                                  iframeRef.current.contentWindow.postMessage({ action: "play", method: "play" }, "*")
+                                  iframeRef.current.contentWindow.postMessage({ command: "play" }, "*")
                                 } catch (e) {
-                                  console.log("[v0] Cannot control iframe playback")
+                                  console.log("[v0] Cannot send play commands to iframe")
                                 }
                               }
-                            }, 500)
+                            }, 1000)
                           }
                         }}
                         onError={() => {
