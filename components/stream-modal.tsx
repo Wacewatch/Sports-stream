@@ -538,7 +538,6 @@ export function StreamModal({ match, open = true, onClose }: StreamModalProps) {
                         className="absolute inset-0 w-full h-full border-0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                         allowFullScreen
-                        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
                         onLoad={() => {
                           if (isStreamUnlocked) {
                             setIframeLoading(false)
