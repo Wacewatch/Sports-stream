@@ -272,6 +272,19 @@ export function StreamModal({ match, open = true, onClose }: StreamModalProps) {
         title: "Merci pour votre soutien !",
         message: "Chargement du stream...",
       })
+      setTimeout(() => {
+        if (iframeRef.current) {
+          try {
+            // Try to unmute after autoplay starts
+            iframeRef.current.contentWindow?.postMessage({ action: "play" }, "*")
+            setTimeout(() => {
+              iframeRef.current?.contentWindow?.postMessage({ action: "unmute" }, "*")
+            }, 1000)
+          } catch (e) {
+            console.log("[v0] Could not control iframe:", e)
+          }
+        }
+      }, 2000)
     }, 500) // Reduced delay
   }, [])
 
@@ -532,7 +545,7 @@ export function StreamModal({ match, open = true, onClose }: StreamModalProps) {
                         ref={iframeRef}
                         src={
                           isStreamUnlocked
-                            ? `${selectedStream}${selectedStream.includes("?") ? "&" : "?"}autoplay=1&muted=0&controls=1&autopause=0&background=0`
+                            ? `${selectedStream}${selectedStream.includes("?") ? "&" : "?"}autoplay=1&muted=1&controls=1&loop=0`
                             : "about:blank"
                         }
                         className="absolute inset-0 w-full h-full border-0"
@@ -540,7 +553,18 @@ export function StreamModal({ match, open = true, onClose }: StreamModalProps) {
                         allowFullScreen
                         onLoad={() => {
                           if (isStreamUnlocked) {
+                            console.log("[v0] Iframe loaded, attempting autoplay...")
                             setIframeLoading(false)
+                            setTimeout(() => {
+                              if (iframeRef.current) {
+                                try {
+                                  iframeRef.current.contentWindow?.postMessage({ action: "play" }, "*")
+                                  iframeRef.current.contentWindow?.postMessage({ action: "unmute" }, "*")
+                                } catch (e) {
+                                  console.log("[v0] Cannot control iframe playback")
+                                }
+                              }
+                            }, 500)
                           }
                         }}
                         onError={() => {
