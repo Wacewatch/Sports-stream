@@ -68,7 +68,6 @@ export function StreamModal({ match, open = true, onClose }: StreamModalProps) {
 
   const [isStreamUnlocked, setIsStreamUnlocked] = useState(false)
   const [unlockLoading, setUnlockLoading] = useState(false)
-  const [iframeLoading, setIframeLoading] = useState(false)
 
   const [loadingDetails, setLoadingDetails] = useState(true)
   const [stats, setStats] = useState<any[]>([])
@@ -107,7 +106,8 @@ export function StreamModal({ match, open = true, onClose }: StreamModalProps) {
   useEffect(() => {
     localStorage.removeItem(UNLOCK_KEY)
     setIsStreamUnlocked(false)
-    setIframeLoading(false)
+    // Removed setIframeLoading(false) as it's no longer needed
+    // setIframeLoading(false)
 
     setIsFav(isFavorite(match.id))
     addToHistory({
@@ -252,28 +252,29 @@ export function StreamModal({ match, open = true, onClose }: StreamModalProps) {
 
     setTimeout(() => {
       setIsStreamUnlocked(true)
-      setIframeLoading(true) // Start iframe loading
-      localStorage.setItem(UNLOCK_KEY, JSON.stringify({ timestamp: Date.now() }))
+      // setIframeLoading(true)
+      localStorage.setItem(UNLOCK_KEY, JSON.JSON.stringify({ timestamp: Date.now() }))
       setUnlockLoading(false)
 
       showNotification({
         type: "success",
         title: "Merci pour votre soutien !",
-        message: "Chargement du stream...",
+        message: "Profitez du stream !",
       })
       setTimeout(() => {
         if (iframeRef.current) {
           try {
             // Try to unmute after autoplay starts
             iframeRef.current.contentWindow?.postMessage({ action: "play" }, "*")
+            iframeRef.current.contentWindow?.postMessage({ command: "play" }, "*")
             setTimeout(() => {
               iframeRef.current?.contentWindow?.postMessage({ action: "unmute" }, "*")
-            }, 1000)
+            }, 500)
           } catch (e) {
             console.log("[v0] Could not control iframe:", e)
           }
         }
-      }, 2000)
+      }, 500)
     }, 500) // Reduced delay
   }, [])
 
@@ -516,7 +517,7 @@ export function StreamModal({ match, open = true, onClose }: StreamModalProps) {
                         </div>
                       )}
 
-                      {isStreamUnlocked && iframeLoading && (
+                      {/* {isStreamUnlocked && iframeLoading && (
                         <div className="absolute inset-0 bg-black/90 z-40 flex items-center justify-center">
                           <div className="text-center">
                             <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 text-red-500 animate-spin" />
@@ -528,41 +529,35 @@ export function StreamModal({ match, open = true, onClose }: StreamModalProps) {
                             </p>
                           </div>
                         </div>
-                      )}
+                      )} */}
 
                       <iframe
                         ref={iframeRef}
-                        src={
-                          isStreamUnlocked
-                            ? `${selectedStream}${selectedStream.includes("?") ? "&" : "?"}autoplay=1&muted=1&controls=1`
-                            : "about:blank"
-                        }
+                        src={`${selectedStream}${selectedStream.includes("?") ? "&" : "?"}autoplay=1&muted=1&controls=1`}
                         className="absolute inset-0 w-full h-full border-0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                         allowFullScreen
                         onLoad={() => {
-                          if (isStreamUnlocked) {
-                            console.log("[v0] Iframe loaded successfully")
-                            setIframeLoading(false)
-                            setTimeout(() => {
-                              if (iframeRef.current?.contentWindow) {
-                                try {
-                                  // Send multiple play commands to ensure it works
-                                  iframeRef.current.contentWindow.postMessage(
-                                    '{"event":"command","func":"playVideo","args":""}',
-                                    "*",
-                                  )
-                                  iframeRef.current.contentWindow.postMessage({ action: "play", method: "play" }, "*")
-                                  iframeRef.current.contentWindow.postMessage({ command: "play" }, "*")
-                                } catch (e) {
-                                  console.log("[v0] Cannot send play commands to iframe")
-                                }
+                          console.log("[v0] Iframe loaded and ready in background")
+                          // Try to trigger play commands even when locked so it's ready
+                          setTimeout(() => {
+                            if (iframeRef.current?.contentWindow) {
+                              try {
+                                iframeRef.current.contentWindow.postMessage(
+                                  '{"event":"command","func":"playVideo","args":""}',
+                                  "*",
+                                )
+                                iframeRef.current.contentWindow.postMessage({ action: "play", method: "play" }, "*")
+                                iframeRef.current.contentWindow.postMessage({ command: "play" }, "*")
+                              } catch (e) {
+                                console.log("[v0] Cannot send preload commands to iframe")
                               }
-                            }, 1000)
-                          }
+                            }
+                          }, 1000)
                         }}
                         onError={() => {
-                          setIframeLoading(false)
+                          // Removed setIframeLoading(false) as it's no longer needed
+                          // setIframeLoading(false)
                         }}
                       />
                     </>
