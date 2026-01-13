@@ -146,7 +146,7 @@ interface NotificationContainerProps {
 
 export function NotificationContainer({ notifications, onClose }: NotificationContainerProps) {
   return (
-    <div className="fixed top-20 right-4 z-[60] flex flex-col gap-3 max-w-sm w-full pointer-events-none">
+    <div className="fixed top-16 sm:top-20 right-2 sm:right-4 z-[60] flex flex-col gap-2 sm:gap-3 max-w-[calc(100vw-1rem)] sm:max-w-sm w-full pointer-events-none">
       {notifications.map((notif) => (
         <div key={notif.id} className="pointer-events-auto">
           <Notification {...notif} onClose={onClose} />
